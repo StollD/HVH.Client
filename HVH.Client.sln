@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HVH.Client.Mac", "HVH.Clien
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HVH.Common", "common\src\HVH.Common.csproj", "{92D0A93A-89AD-46FE-94BE-3B5F5F3410E6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HVH.Common.Encryptions", "common\encryptions\HVH.Common.Encryptions.csproj", "{FECEAD95-233F-424A-83DD-3903D29FD080}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{92D0A93A-89AD-46FE-94BE-3B5F5F3410E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92D0A93A-89AD-46FE-94BE-3B5F5F3410E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92D0A93A-89AD-46FE-94BE-3B5F5F3410E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FECEAD95-233F-424A-83DD-3903D29FD080}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FECEAD95-233F-424A-83DD-3903D29FD080}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FECEAD95-233F-424A-83DD-3903D29FD080}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FECEAD95-233F-424A-83DD-3903D29FD080}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
