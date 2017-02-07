@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HVH.Client.Windows", "HVH.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HVH.Client.Mac", "HVH.Client.Mac\HVH.Client.Mac.csproj", "{28A89276-925E-45AE-9E94-FECB2623D784}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HVH.Common", "common\src\HVH.Common.csproj", "{92D0A93A-89AD-46FE-94BE-3B5F5F3410E6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{28A89276-925E-45AE-9E94-FECB2623D784}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28A89276-925E-45AE-9E94-FECB2623D784}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28A89276-925E-45AE-9E94-FECB2623D784}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92D0A93A-89AD-46FE-94BE-3B5F5F3410E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92D0A93A-89AD-46FE-94BE-3B5F5F3410E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92D0A93A-89AD-46FE-94BE-3B5F5F3410E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92D0A93A-89AD-46FE-94BE-3B5F5F3410E6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

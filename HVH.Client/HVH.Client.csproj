@@ -46,5 +46,11 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\common\src\HVH.Common.csproj">
+      <Project>{92d0a93a-89ad-46fe-94be-3b5f5f3410e6}</Project>
+      <Name>HVH.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
