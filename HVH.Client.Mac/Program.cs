@@ -7,6 +7,7 @@
  using System;
 using Eto;
 using Eto.Forms;
+ using HVH.Client.Forms;
 
 namespace HVH.Client.Mac
 {

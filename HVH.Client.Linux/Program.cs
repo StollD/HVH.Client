@@ -4,9 +4,10 @@
  * Licensed under the terms of the MIT License
  */
 
- using System;
+using System;
 using Eto;
 using Eto.Forms;
+using HVH.Client.Forms;
 
 namespace HVH.Client.Linux
 {

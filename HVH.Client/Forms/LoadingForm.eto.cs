@@ -26,7 +26,7 @@ namespace HVH.Client.Forms
             Resizable = false;
             Minimizable = false;
             Maximizable = false;
-            LoadComplete += OnLoadComplete;
+            Shown += OnLoadComplete;
 
             // Loading State
             status = new Label
@@ -55,18 +55,7 @@ namespace HVH.Client.Forms
         /// </summary>
         public static void SetStatus(String text)
         {
-            while (status.TextColor.Ab != 0)
-            {
-                status.TextColor = Color.FromArgb(status.TextColor.Rb, status.TextColor.Gb, status.TextColor.Bb, status.TextColor.Ab - 1);
-                Thread.Sleep(10);
-            }
             status.Text = text;
-            Thread.Sleep(1000);
-            while (status.TextColor.Ab != 255)
-            {
-                status.TextColor = Color.FromArgb(status.TextColor.Rb, status.TextColor.Gb, status.TextColor.Bb, status.TextColor.Ab + 1);
-                Thread.Sleep(10);
-            }
         }
     }
 }

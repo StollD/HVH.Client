@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Threading;
 using HVH.Common.Plugins;
 using log4net;
+using log4net.Config;
 
 namespace HVH.Client.Forms
 {
@@ -26,6 +27,9 @@ namespace HVH.Client.Forms
 
         public LoadingForm()
         {
+            // Initialize log4net.
+            XmlConfigurator.Configure();
+
             // Create dirs
             Directory.CreateDirectory("logs/");
             Directory.CreateDirectory("plugins/");
@@ -50,6 +54,7 @@ namespace HVH.Client.Forms
 
             // Create the client interface
             Client.Instance = new Client();
+            SetStatus("Connecting to the server...");
         }
     }
 }
