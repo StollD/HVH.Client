@@ -9,7 +9,7 @@ using Eto.Drawing;
 using System;
 using System.Threading;
 
-namespace HVH.Client
+namespace HVH.Client.Forms
 {
     /// <summary>
     /// This class is responsible for initializing the application and connecting to the Server
@@ -26,6 +26,7 @@ namespace HVH.Client
             Resizable = false;
             Minimizable = false;
             Maximizable = false;
+            LoadComplete += OnLoadComplete;
 
             // Loading State
             status = new Label

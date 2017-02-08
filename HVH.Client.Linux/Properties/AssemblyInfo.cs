@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
+using log4net.Config;
 
 [assembly: AssemblyTitle("HVH.Client")]
 [assembly: AssemblyDescription("User interface for using and administrating the HVH.* infrastructure")]

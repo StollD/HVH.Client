@@ -7,8 +7,12 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using Eto.Drawing;
+using Helios.Net;
+using Helios.Topology;
+using HVH.Common.Interfaces;
 using log4net;
 
 namespace HVH.Client
@@ -16,7 +20,7 @@ namespace HVH.Client
     /// <summary>
     /// Class that contains small helper functions
     /// </summary>
-    public class Utility
+    public static class Utility
     {
         /// <summary>
         /// Logger
@@ -33,6 +37,20 @@ namespace HVH.Client
             t.Start();
             log.DebugFormat("Started new thread: {0}", start.Method.Name);
             return t;
+        }
+
+        /// <summary>
+        /// Abstraction layer over connection.Send()
+        /// </summary>
+        public static void Send(this IConnection connection, String data, INode node, IEncryptionProvider encryption = null)
+        {
+            Byte[] buffer = Encoding.UTF8.GetBytes(data);
+            if (encryption != null)
+            {
+                buffer = encryption.Encrypt(buffer);
+            }
+            log.DebugFormat("Message sent. Length: {0}", buffer.Length);
+            connection.Send(buffer, 0, buffer.Length, node);
         }
 
         /// <summary>
