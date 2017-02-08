@@ -116,6 +116,13 @@ namespace HVH.Client
                     Connection.Client.Close();
                     Environment.Exit(1);
                 }
+                else if (message == Communication.SERVER_SEND_HEARTBEAT_CHALLENGE)
+                {
+                    log.Debug("Heartbeat received");
+                    connection.Send(Communication.CLIENT_SEND_HEARTBEAT, networkData.RemoteHost, encryption);
+                    connection.Send(Environment.UserName, networkData.RemoteHost, encryption);
+                    messageBacklog.Clear();
+                }
                 else if (message == Communication.SERVER_SEND_DISCONNECT)
                 {
                     // Server has gone offline, go and die too
