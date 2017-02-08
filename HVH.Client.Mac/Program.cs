@@ -15,7 +15,7 @@ namespace HVH.Client.Mac
         [STAThread]
         public static void Main(string[] args)
         {
-            new Application(Platforms.Mac).Run(new MainForm());
+            new Application(Platforms.Mac).Run(new LoadingForm());
         }
     }
 }

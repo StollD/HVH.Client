@@ -15,7 +15,7 @@ namespace HVH.Client.Linux
         [STAThread]
         public static void Main(string[] args)
         {
-            new Application(Platforms.Gtk3).Run(new MainForm());
+            new Application(Platforms.Gtk3).Run(new LoadingForm());
         }
     }
 }
