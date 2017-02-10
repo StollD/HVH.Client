@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using Helios.Exceptions;
 using Helios.Net;
 using Helios.Topology;
 using HVH.Common.Connection;
@@ -57,7 +58,7 @@ namespace HVH.Client
         public List<Thread> Threads { get; set; }        
         
         // The last message received from the server
-        private List<String> messageBacklog;        
+        private List<String> messageBacklog = new List<String>();     
         
         // Whether we sent data to the server, waiting for an answer
         private Boolean sessionDataPending;
@@ -71,6 +72,7 @@ namespace HVH.Client
             Connection = new ConnectionWorker(ConnectionSettings.Instance.server, ConnectionSettings.Instance.port);
             Connection.Established = ConnectionEstablished;
             Connection.Received = DataReceived;
+            Connection.Terminated = ConnectionTerminated;
             Threads = new List<Thread>();
         }
         
@@ -86,6 +88,7 @@ namespace HVH.Client
             encryption = rsa;
             connection.Send(Communication.CLIENT_SEND_PUBLIC_KEY, node, new NoneEncryptionProvider());
             connection.Send(rsa.key.ToXmlString(false), node, new NoneEncryptionProvider());
+            connection.BeginReceive();
         }
 
         /// <summary>
@@ -104,7 +107,7 @@ namespace HVH.Client
                 messageBacklog.Add(message);
 
             // Do we have a message cached
-            if (buffer.Length == 32 && messageBacklog.Count == 0)
+            if (buffer.Length == 32 && messageBacklog.Count == 1)
             {
                 // Handle messages who dont have additional parameters  
                 if (!SessionCreated && sessionDataPending &&
@@ -132,7 +135,7 @@ namespace HVH.Client
                     Environment.Exit(1);
                 }
             }
-            else if (messageBacklog.Any())
+            else if (messageBacklog.Count > 1)
             {
                 if (messageBacklog[0] == Communication.SERVER_SEND_SESSION_KEY)
                 {
@@ -188,6 +191,19 @@ namespace HVH.Client
                     messageBacklog.Clear();
                 }
             }
+        }
+
+        /// <summary>
+        /// Handles an abrupt termination of the connection
+        /// </summary>
+        /// <param name="heliosConnectionException"></param>
+        /// <param name="connection"></param>
+        private void ConnectionTerminated(HeliosConnectionException heliosConnectionException, IConnection connection)
+        {
+            // Server has gone offline, go and die too
+            log.FatalFormat("Server went offline. Reason: {0}", heliosConnectionException.Message);
+            Connection.Client.Close();
+            Environment.Exit(1);
         }
     }
 }
