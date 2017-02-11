@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using Eto.Forms;
 using Helios.Exceptions;
 using Helios.Net;
 using Helios.Topology;
@@ -134,6 +135,17 @@ namespace HVH.Client
                     Connection.Client.Close();
                     Environment.Exit(1);
                 }
+                else if (message == Communication.SERVER_SEND_LOGIN_INVALID)
+                {
+                    // No login :(
+                    Application.Instance.AsyncInvoke(noLogInAction);
+                    messageBacklog.Clear();
+                }
+                else if (message == Communication.SERVER_SEND_NO_LOGIN_SERVERS)
+                {
+                    Application.Instance.AsyncInvoke(noLogInServerAction);
+                    messageBacklog.Clear();
+                }
             }
             else if (messageBacklog.Count > 1)
             {
@@ -143,7 +155,7 @@ namespace HVH.Client
                     try
                     {
                         Type encoderType = PluginManager.GetType<IEncryptionProvider>(SecuritySettings.Instance.encryption);
-                        encryption = (IEncryptionProvider)Activator.CreateInstance(encoderType);
+                        encryption = (IEncryptionProvider) Activator.CreateInstance(encoderType);
                     }
                     catch (Exception e)
                     {
@@ -177,6 +189,7 @@ namespace HVH.Client
                         sessionDataPending = false;
                         SessionCreated = true;
                         log.Info("Session created");
+                        Application.Instance.AsyncInvoke(logInAction);
                     }
                     else
                     {
@@ -190,7 +203,109 @@ namespace HVH.Client
                     // Clear
                     messageBacklog.Clear();
                 }
+                else if (messageBacklog[0] == Communication.SERVER_SEND_LOGIN_SUCCESS)
+                {
+                    UserType type = (UserType) Enum.Parse(typeof(UserType), message);
+                    log.InfoFormat("Login was successfull. Usertype: {0}", type);
+                    Application.Instance.AsyncInvoke(loggedInAction);
+                    messageBacklog.Clear();
+                }
             }
+            else
+            {
+                messageBacklog.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Starts the login process
+        /// </summary>
+        public void Login(String username, String password)
+        {
+            if (String.IsNullOrWhiteSpace(username))
+            {
+                log.Error("Invalid username entered");
+                throw new ArgumentNullException(nameof(username), "You have to enter a username.");
+            }
+            if (String.IsNullOrWhiteSpace(password))
+            {
+                log.Error("Invalid password entered.");
+                throw new ArgumentNullException(nameof(password), "You have to enter a password.");
+            }
+
+            // Send login request
+            Connection.Client.Send(Communication.CLIENT_SEND_LOGIN_REQUEST, Connection.Client.RemoteHost, encryption);
+            Connection.Client.Send(username, Connection.Client.RemoteHost, encryption);
+            Connection.Client.Send(password, Connection.Client.RemoteHost, encryption);
+            log.Info("Sent login request");
+        }
+
+        /// <summary>
+        /// Callback that is invoked when we need to send login data
+        /// </summary>
+        private Action logInAction { get; set; }
+
+        /// <summary>
+        /// Registers an action
+        /// </summary>
+        public void RegisterLoginAction(Action callback)
+        {
+            logInAction = () =>
+            {
+                callback();
+                logInAction = null;
+            };
+        }
+
+        /// <summary>
+        /// Callback that is invoked when the login was successfulö
+        /// </summary>
+        private Action loggedInAction { get; set; }
+
+        /// <summary>
+        /// Registers an action
+        /// </summary>
+        public void RegisterLoggedInAction(Action callback)
+        {
+            loggedInAction = () =>
+            {
+                callback();
+                loggedInAction = null;
+            };
+        }
+
+        /// <summary>
+        /// Callback that is invoked when the login wasnt successfull
+        /// </summary>
+        private Action noLogInAction { get; set; }
+
+        /// <summary>
+        /// Registers an action
+        /// </summary>
+        public void RegisterNoLoginAction(Action callback)
+        {
+            noLogInAction = () =>
+            {
+                callback();
+                noLogInAction = null;
+            };
+        }
+
+        /// <summary>
+        /// Callback that is invoked when the login wasnt successfull because no login server was available
+        /// </summary>
+        private Action noLogInServerAction { get; set; }
+
+        /// <summary>
+        /// Registers an action
+        /// </summary>
+        public void RegisterNoLoginServerAction(Action callback)
+        {
+            noLogInServerAction = () =>
+            {
+                callback();
+                noLogInServerAction = null;
+            };
         }
 
         /// <summary>

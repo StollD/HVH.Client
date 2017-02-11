@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using HVH.Common.Plugins;
 using log4net;
 using log4net.Config;
@@ -46,15 +47,17 @@ namespace HVH.Client.Forms
         /// Fires when the form was successfully loaded.
         /// Here we establish a connection to the HVH.Server and prepare everything for login
         /// </summary>
-        private void OnLoadComplete(Object sender, EventArgs e)
+        private async void OnLoadComplete(Object sender, EventArgs e)
         {
             // Load plugins
-            SetStatus("Loading Plugins...");
+            await SetStatus("Loading Plugins...");
             PluginManager.LoadPlugins();
+            await Task.Delay(2000);
 
             // Create the client interface
+            await SetStatus("Connecting to the server...");
             Client.Instance = new Client();
-            SetStatus("Connecting to the server...");
+            Client.Instance.RegisterLoginAction(AssembleLoginForm);
         }
     }
 }

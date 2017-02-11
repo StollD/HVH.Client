@@ -52,6 +52,7 @@
       <DependentUpon>LoadingForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UserType.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>
