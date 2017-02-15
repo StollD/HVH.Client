@@ -56,7 +56,12 @@ namespace HVH.Client
         /// <summary>
         /// The threads created by the application
         /// </summary>
-        public List<Thread> Threads { get; set; }        
+        public List<Thread> Threads { get; set; }       
+        
+        /// <summary>
+        /// Data about the current user
+        /// </summary>
+        public UserStatus Status { get; set; } 
         
         // The last message received from the server
         private List<String> messageBacklog = new List<String>();     
@@ -75,6 +80,7 @@ namespace HVH.Client
             Connection.Received = DataReceived;
             Connection.Terminated = ConnectionTerminated;
             Threads = new List<Thread>();
+            Status = new UserStatus();
         }
         
         /// <summary>
@@ -140,11 +146,13 @@ namespace HVH.Client
                     // No login :(
                     Application.Instance.AsyncInvoke(noLogInAction);
                     messageBacklog.Clear();
+                    Status = new UserStatus();
                 }
                 else if (message == Communication.SERVER_SEND_NO_LOGIN_SERVERS)
                 {
                     Application.Instance.AsyncInvoke(noLogInServerAction);
                     messageBacklog.Clear();
+                    Status = new UserStatus();
                 }
             }
             else if (messageBacklog.Count > 1)
@@ -207,6 +215,7 @@ namespace HVH.Client
                 {
                     UserType type = (UserType) Enum.Parse(typeof(UserType), message);
                     log.InfoFormat("Login was successfull. Usertype: {0}", type);
+                    Status = new UserStatus {Username = Status.Username, Type = type};
                     Application.Instance.AsyncInvoke(loggedInAction);
                     messageBacklog.Clear();
                 }
@@ -238,6 +247,7 @@ namespace HVH.Client
             Connection.Client.Send(username, Connection.Client.RemoteHost, encryption);
             Connection.Client.Send(password, Connection.Client.RemoteHost, encryption);
             log.Info("Sent login request");
+            Status = new UserStatus {Username = username};
         }
 
         /// <summary>
@@ -319,6 +329,12 @@ namespace HVH.Client
             log.FatalFormat("Server went offline. Reason: {0}", heliosConnectionException.Message);
             Connection.Client.Close();
             Environment.Exit(1);
+        }
+
+        public struct UserStatus
+        {
+            public String Username { get; set; }
+            public UserType Type { get; set; }
         }
     }
 }

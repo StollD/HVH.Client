@@ -10,6 +10,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.IO;
 
 namespace HVH.Client.Forms
 {
@@ -24,6 +25,7 @@ namespace HVH.Client.Forms
         private void InitializeComponent()
         {
             Title = "HVH.Client";
+            Icon = new Icon(Directory.GetCurrentDirectory() + "/assets/helmholtz_owl.ico");
             ClientSize = new Size(400, 300);
             Resizable = false;
             Minimizable = false;
@@ -33,7 +35,7 @@ namespace HVH.Client.Forms
             controls["status"] = new Label
             {
                 Text = "HVH.Client - Version 0.0.0.1",
-                Font = new Font(FontFamilies.Sans, 10),
+                Font = new Font("Segoe UI", 9),
                 BackgroundColor = Colors.LightGrey,
                 TextColor = Colors.DarkSlateGray,
                 Size = new Size(400, 16),
@@ -65,7 +67,7 @@ namespace HVH.Client.Forms
             controls["usernameL"] = new Label
             {
                 Text = "Username",
-                Font = new Font(FontFamilies.Sans, 9),
+                Font = new Font("Segoe UI", 9),
                 BackgroundColor = Colors.Transparent,
                 TextColor = Colors.WhiteSmoke,
                 Size = new Size(250, 16),
@@ -74,14 +76,14 @@ namespace HVH.Client.Forms
             controls["username"] = new TextBox
             {
                 BackgroundColor = Colors.WhiteSmoke,
-                Font = new Font(FontFamilies.Sans, 12),
+                Font = new Font("Segoe UI", 12),
                 TextColor = Colors.DimGray,
                 Size = new Size(250, 30)
             };
             controls["passwordL"] = new Label
             {
                 Text = "Password",
-                Font = new Font(FontFamilies.Sans, 9),
+                Font = new Font("Segoe UI", 9),
                 BackgroundColor = Colors.Transparent,
                 TextColor = Colors.WhiteSmoke,
                 Size = new Size(250, 16),
@@ -90,7 +92,7 @@ namespace HVH.Client.Forms
             controls["password"] = new PasswordBox
             {                
                 BackgroundColor = Colors.WhiteSmoke,
-                Font = new Font(FontFamilies.Sans, 12),
+                Font = new Font("Segoe UI", 12),
                 PasswordChar = '*',
                 TextColor = Colors.DimGray,
                 Size = new Size(250, 30)                
@@ -98,7 +100,7 @@ namespace HVH.Client.Forms
             controls["submit"] = new Button
             {
                 Text = "Login",
-                Font = new Font(FontFamilies.Sans, 12),
+                Font = new Font("Segoe UI", 12),
                 Size = new Size(80, 30),
                 BackgroundColor = Colors.WhiteSmoke,
                 TextColor = Colors.DimGray,
@@ -133,7 +135,7 @@ namespace HVH.Client.Forms
 
         private void HandleLogin()
         {
-                
+            new TeacherForm().Show();
         }
 
         private void HandleNoLogin()
@@ -189,7 +191,7 @@ namespace HVH.Client.Forms
                 controls["warning"] = new Label
                 {
                     Text = text,
-                    Font = new Font(FontFamilies.Sans, 10),
+                    Font = new Font("Segoe UI", 10),
                     BackgroundColor = Colors.Transparent,
                     TextColor = Colors.OrangeRed,
                     Size = new Size(160, 32),
