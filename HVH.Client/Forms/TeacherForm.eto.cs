@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace HVH.Client.Forms
 {
@@ -134,14 +135,41 @@ namespace HVH.Client.Forms
                 Value = 0,
                 Size = new Size(1, 32)
             };
-            controls["stream"] = new Button
+            controls["report"] = new Button
             {
                 Text = "",
-                Size = new Size(70, 30),
-                Image = Utility.LoadBitmap("assets/fontawesome/black/png/32/tv.png"),
-                ImagePosition = ButtonImagePosition.Overlay,
-                ToolTip = "Stream the desktop of your PC to the selected computers",
+                Size = new Size(30, 30),
+                Image = Utility.LoadBitmap("assets/fontawesome/black/png/32/exclamation-triangle.png"),
+                ImagePosition = ButtonImagePosition.Left,
+                ToolTip = "Report an issue to the system administrators"
             };
+            controls["leave"] = new Button
+            {
+                Text = "",
+                Size = new Size(30, 30),
+                Image = Utility.LoadBitmap("assets/fontawesome/black/png/32/sign-out.png"),
+                ImagePosition = ButtonImagePosition.Left,
+                ToolTip = "Go back to the main menu"
+            };
+
+            // Events
+            (controls["shutdown"] as Button).Click += async delegate
+            {
+                await SendShutdown(false);
+            };
+            (controls["restart"] as Button).Click += async delegate
+            {
+                await SendShutdown(true);
+            };
+            (controls["lock"] as Button).Click += async delegate
+            {
+                await SendLock(false);
+            };
+            (controls["unlock"] as Button).Click += async delegate
+            {
+                await SendLock(true);
+            };
+
 
             PixelLayout layout = new PixelLayout();
             layout.Add(controls["roomL"], 20, 10);
@@ -156,8 +184,70 @@ namespace HVH.Client.Forms
             layout.Add(controls["lock"], 105, 290);
             layout.Add(controls["unlock"], 140, 290);
             layout.Add(controls["seperator3"], 180, 290);
-            layout.Add(controls["stream"], 190, 290);
+            layout.Add(controls["report"], 190, 290);
+            layout.Add(controls["leave"], 225, 290);
             Content = layout;
+        }
+
+        private void RoomNameReceived(String[] names)
+        {
+            (controls["room"] as Label).Text = names.FirstOrDefault();
+            Client.Instance.RequestClients(names.FirstOrDefault(), false);
+        }
+
+        private void ClientsReceived(String[] names, Boolean locked)
+        {
+            Scrollable scroll = controls["scroll"] as Scrollable;
+            StackLayout stack = scroll.Content as StackLayout;
+            if (!locked)
+            {
+                stack.Items.Clear();
+                for (Int32 i = 0; i < names.Length; i++)
+                {
+                    stack.Items.Add(new StackLayoutItem { Control = new CheckBox { Font = new Font("Segoe UI", 10), Text = names[i], ThreeState = false } });
+                }
+                
+                // Get locked clients
+                Client.Instance.RequestClients((controls["room"] as Label).Text, true);
+            } 
+            else
+            {
+                for (Int32 i = 0; i < stack.Items.Count; i++)
+                {
+                    if (names.Contains((stack.Items[i].Control as CheckBox).Text))
+                    {
+                        (stack.Items[i].Control as CheckBox).Text += " (locked)";
+                    }
+                }
+            }
+        }
+
+        private Task SendShutdown(Boolean restart)
+        {
+            Scrollable scroll = controls["scroll"] as Scrollable;
+            StackLayout stack = scroll.Content as StackLayout;
+            List<String> clients = new List<String>();
+            for (Int32 i = 0; i < stack.Items.Count; i++)
+            {
+                CheckBox box = stack.Items[i].Control as CheckBox;
+                if (box.Checked.GetValueOrDefault())
+                    clients.Add(box.Text);
+            }
+            return Client.Instance.SendShutdown(clients.ToArray(), restart);
+        }
+
+        private Task SendLock(Boolean unlock)
+        {
+            Scrollable scroll = controls["scroll"] as Scrollable;
+            StackLayout stack = scroll.Content as StackLayout;
+            List<String> clients = new List<String>();
+            for (Int32 i = 0; i < stack.Items.Count; i++)
+            {
+                CheckBox box = stack.Items[i].Control as CheckBox;
+                if (box.Checked.GetValueOrDefault())
+                    clients.Add(box.Text);
+            }
+            return Client.Instance.SendLock(clients.ToArray(), unlock);
         }
     }
 }

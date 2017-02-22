@@ -28,16 +28,23 @@ namespace HVH.Client.Forms
 
         public TeacherForm()
         {
+            log.Info("Opening Teacher Room Control Window");
             InitializeComponent();
+            LoadData();
         }
 
         /// <summary>
-        /// Fires when the form was successfully loaded.
         /// Here we fetch data from the HVH.Server
         /// </summary>
         private void LoadData()
         {
-
+            Client.Instance.RegisterRoomNameReceivedAction(RoomNameReceived);
+            Client.Instance.RegisterRoomComputersReceivedAction(ClientsReceived);
+            Utility.StartThread(() =>
+            {
+                Client.Instance.FillRoomData();
+                Thread.Sleep(5000);
+            }, true);
         }
     }
 }

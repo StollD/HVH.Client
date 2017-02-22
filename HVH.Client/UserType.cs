@@ -11,7 +11,7 @@ namespace HVH.Client
     /// </summary>
     public enum UserType
     {
-        Lehrer = 512,
+        Teacher = 512,
         Normal = 256,
         Admin = 1024
     }

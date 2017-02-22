@@ -51,6 +51,10 @@
     <Compile Include="Forms\LoadingForm.eto.cs">
       <DependentUpon>LoadingForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\MenuForm.cs" />
+    <Compile Include="Forms\MenuForm.eto.cs">
+      <DependentUpon>MenuForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\TeacherForm.cs" />
     <Compile Include="Forms\TeacherForm.eto.cs">
       <DependentUpon>TeacherForm.cs</DependentUpon>

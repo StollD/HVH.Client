@@ -135,7 +135,10 @@ namespace HVH.Client.Forms
 
         private void HandleLogin()
         {
-            new TeacherForm().Show();
+            Application.Instance.MainForm = new MenuForm();
+            Application.Instance.MainForm.Show();
+            Visible = false;
+
         }
 
         private void HandleNoLogin()

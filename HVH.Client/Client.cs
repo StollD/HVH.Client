@@ -10,10 +10,12 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Eto.Forms;
 using Helios.Exceptions;
 using Helios.Net;
 using Helios.Topology;
+using HVH.Client.Forms;
 using HVH.Common.Connection;
 using HVH.Common.Encryption;
 using HVH.Common.Interfaces;
@@ -213,10 +215,55 @@ namespace HVH.Client
                 }
                 else if (messageBacklog[0] == Communication.SERVER_SEND_LOGIN_SUCCESS)
                 {
-                    UserType type = (UserType) Enum.Parse(typeof(UserType), message);
+                    UserType type = (UserType) Int32.Parse(message);
                     log.InfoFormat("Login was successfull. Usertype: {0}", type);
                     Status = new UserStatus {Username = Status.Username, Type = type};
                     Application.Instance.AsyncInvoke(loggedInAction);
+                    messageBacklog.Clear();
+                }
+                else if (messageBacklog[0] == Communication.SERVER_SEND_ROOMS && message == Communication.SERVER_SEND_ROOMS_FINISHED)
+                {
+                    String[] rooms = new String[messageBacklog.Count - 2];
+                    for (Int32 i = 1; i < messageBacklog.Count - 1; i++)
+                    {
+                        rooms[i] = messageBacklog[i];
+                    }
+                    
+                    // We've got rooms
+                    Application.Instance.AsyncInvoke(() =>
+                    {
+                        roomNameReceivedAction(rooms);
+                    });
+                    messageBacklog.Clear();
+                }
+                else if (messageBacklog[0] == Communication.SERVER_SEND_STARTED_CLIENTS && message == Communication.SERVER_SEND_STARTED_CLIENTS_FINISHED)
+                {
+                    List<String> computers = new List<String>();
+                    for (Int32 i = 1; i < messageBacklog.Count - 1; i++)
+                    {
+                        computers.AddRange(messageBacklog[i].Split(new [] {";"}, StringSplitOptions.RemoveEmptyEntries));
+                    }
+
+                    // We've got rooms
+                    Application.Instance.AsyncInvoke(() =>
+                    {
+                        roomComputersReceivedAction(computers.ToArray(), false);
+                    });
+                    messageBacklog.Clear();
+                }
+                else if (messageBacklog[0] == Communication.SERVER_SEND_LOCKED_CLIENTS && message == Communication.SERVER_SEND_LOCKED_CLIENTS_FINISHED)
+                {
+                    List<String> computers = new List<String>();
+                    for (Int32 i = 1; i < messageBacklog.Count - 1; i++)
+                    {
+                        computers.AddRange(messageBacklog[i].Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries));
+                    }
+
+                    // We've got rooms
+                    Application.Instance.AsyncInvoke(() =>
+                    {
+                        roomComputersReceivedAction(computers.ToArray(), true);
+                    });
                     messageBacklog.Clear();
                 }
             }
@@ -248,6 +295,55 @@ namespace HVH.Client
             Connection.Client.Send(password, Connection.Client.RemoteHost, encryption);
             log.Info("Sent login request");
             Status = new UserStatus {Username = username};
+        }
+
+        /// <summary>
+        /// Requests all data for the teacher window
+        /// </summary>
+        public void FillRoomData()
+        {
+            Connection.Client.Send(Communication.CLIENT_SEND_ROOMS_REQUEST, Connection.Client.RemoteHost, encryption);
+        }
+
+        /// <summary>
+        /// Requests started clients from the server
+        /// </summary>
+        public void RequestClients(String room, Boolean locked)
+        {
+            Connection.Client.Send(locked ? Communication.CLIENT_SEND_LOCKED_CLIENTS_REQUEST : Communication.CLIENT_SEND_STARTED_CLIENTS_REQUEST, Connection.Client.RemoteHost, encryption);
+            Connection.Client.Send(room, Connection.Client.RemoteHost, encryption);
+        }
+
+        /// <summary>
+        /// Sends a request to shutdown / restart various clients
+        /// </summary>
+        public Task SendShutdown(String[] clients, Boolean restart)
+        {
+            return Task.Run(() =>
+            {
+                Connection.Client.Send(restart ? Communication.CLIENT_SEND_RESTART_COMPUTERS : Communication.CLIENT_SEND_SHUTDOWN_COMPUTERS, Connection.Client.RemoteHost, encryption);
+                foreach (String client in clients)
+                {
+                    Connection.Client.Send(client, Connection.Client.RemoteHost, encryption);
+                }
+                Connection.Client.Send(restart ? Communication.CLIENT_SEND_RESTART_COMPUTERS_FINISHED : Communication.CLIENT_SEND_SHUTDOWN_COMPUTERS_FINISHED, Connection.Client.RemoteHost, encryption);
+            });
+        }
+
+        /// <summary>
+        /// Sends a request to lock / unlock various clients
+        /// </summary>
+        public Task SendLock(String[] clients, Boolean unlock)
+        {
+            return Task.Run(() =>
+            {
+                Connection.Client.Send(unlock ? Communication.CLIENT_SEND_UNLOCK_COMPUTERS : Communication.CLIENT_SEND_LOCK_COMPUTERS, Connection.Client.RemoteHost, encryption);
+                foreach (String client in clients)
+                {
+                    Connection.Client.Send(client, Connection.Client.RemoteHost, encryption);
+                }
+                Connection.Client.Send(unlock ? Communication.CLIENT_SEND_UNLOCK_COMPUTERS_FINISHED : Communication.CLIENT_SEND_LOCK_COMPUTERS_FINISHED, Connection.Client.RemoteHost, encryption);
+            });
         }
 
         /// <summary>
@@ -316,6 +412,32 @@ namespace HVH.Client
                 callback();
                 noLogInServerAction = null;
             };
+        }
+
+        /// <summary>
+        /// Callback that is invoked when the room name was fetched sucessfully
+        /// </summary>
+        private Action<String[]> roomNameReceivedAction { get; set; }
+
+        /// <summary>
+        /// Registers an action
+        /// </summary>
+        public void RegisterRoomNameReceivedAction(Action<String[]> callback)
+        {
+            roomNameReceivedAction = callback;
+        }
+
+        /// <summary>
+        /// Callback that is invoked when the computers in this room
+        /// </summary>
+        private Action<String[], Boolean> roomComputersReceivedAction { get; set; }
+
+        /// <summary>
+        /// Registers an action
+        /// </summary>
+        public void RegisterRoomComputersReceivedAction(Action<String[], Boolean> callback)
+        {
+            roomComputersReceivedAction = callback;
         }
 
         /// <summary>
