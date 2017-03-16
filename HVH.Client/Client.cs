@@ -95,8 +95,10 @@ namespace HVH.Client
             log.Info("Connection established. Sending public RSA key.");
             RSAEncryptionProvider rsa = new RSAEncryptionProvider(SecuritySettings.Instance.keySize);
             encryption = rsa;
-            connection.Send(Communication.CLIENT_SEND_PUBLIC_KEY, node, new NoneEncryptionProvider());
-            connection.Send(rsa.key.ToXmlString(false), node, new NoneEncryptionProvider());
+            connection.Send(new [] {
+                Communication.CLIENT_SEND_PUBLIC_KEY,
+                rsa.key.ToXmlString(false)
+            }, node, new NoneEncryptionProvider());
             connection.BeginReceive();
         }
 
@@ -131,8 +133,10 @@ namespace HVH.Client
                 else if (message == Communication.SERVER_SEND_HEARTBEAT_CHALLENGE)
                 {
                     log.Debug("Heartbeat received");
-                    connection.Send(Communication.CLIENT_SEND_HEARTBEAT, networkData.RemoteHost, encryption);
-                    connection.Send(Environment.UserName, networkData.RemoteHost, encryption);
+                    connection.Send(new [] {
+                        Communication.CLIENT_SEND_HEARTBEAT,
+                        Environment.UserName
+                    }, networkData.RemoteHost, encryption);
                     messageBacklog.Clear();
                 }
                 else if (message == Communication.SERVER_SEND_DISCONNECT)
@@ -183,10 +187,12 @@ namespace HVH.Client
 
                     // Send session Data
                     log.Info("Sending session data");
-                    connection.Send(Communication.CLIENT_SEND_USERDATA, networkData.RemoteHost, encryption);
-                    connection.Send(Environment.MachineName, networkData.RemoteHost, encryption);
-                    connection.Send(Environment.UserName, networkData.RemoteHost, encryption);
-                    connection.Send(Communication.CLIENT_ID, networkData.RemoteHost, encryption);
+                    connection.Send(new [] {
+                        Communication.CLIENT_SEND_USERDATA,
+                        Environment.MachineName,
+                        Environment.UserName,
+                        Communication.CLIENT_ID
+                    }, networkData.RemoteHost, encryption);
                     log.Info("Sucessfully send session data");
                     sessionDataPending = true;
 
@@ -290,9 +296,11 @@ namespace HVH.Client
             }
 
             // Send login request
-            Connection.Client.Send(Communication.CLIENT_SEND_LOGIN_REQUEST, Connection.Client.RemoteHost, encryption);
-            Connection.Client.Send(username, Connection.Client.RemoteHost, encryption);
-            Connection.Client.Send(password, Connection.Client.RemoteHost, encryption);
+            Connection.Client.Send(new [] {
+                Communication.CLIENT_SEND_LOGIN_REQUEST,
+                username,
+                password
+            }, Connection.Client.RemoteHost, encryption);
             log.Info("Sent login request");
             Status = new UserStatus {Username = username};
         }
@@ -310,8 +318,10 @@ namespace HVH.Client
         /// </summary>
         public void RequestClients(String room, Boolean locked)
         {
-            Connection.Client.Send(locked ? Communication.CLIENT_SEND_LOCKED_CLIENTS_REQUEST : Communication.CLIENT_SEND_STARTED_CLIENTS_REQUEST, Connection.Client.RemoteHost, encryption);
-            Connection.Client.Send(room, Connection.Client.RemoteHost, encryption);
+            Connection.Client.Send(new [] {
+                locked ? Communication.CLIENT_SEND_LOCKED_CLIENTS_REQUEST : Communication.CLIENT_SEND_STARTED_CLIENTS_REQUEST,
+                room
+            }, Connection.Client.RemoteHost, encryption);
         }
 
         /// <summary>
@@ -321,12 +331,13 @@ namespace HVH.Client
         {
             return Task.Run(() =>
             {
-                Connection.Client.Send(restart ? Communication.CLIENT_SEND_RESTART_COMPUTERS : Communication.CLIENT_SEND_SHUTDOWN_COMPUTERS, Connection.Client.RemoteHost, encryption);
+                List<String> message = new List<String> { restart ? Communication.CLIENT_SEND_RESTART_COMPUTERS : Communication.CLIENT_SEND_SHUTDOWN_COMPUTERS };
                 foreach (String client in clients)
                 {
-                    Connection.Client.Send(client, Connection.Client.RemoteHost, encryption);
+                    message.Add(client);
                 }
-                Connection.Client.Send(restart ? Communication.CLIENT_SEND_RESTART_COMPUTERS_FINISHED : Communication.CLIENT_SEND_SHUTDOWN_COMPUTERS_FINISHED, Connection.Client.RemoteHost, encryption);
+                message.Add(restart ? Communication.CLIENT_SEND_RESTART_COMPUTERS_FINISHED : Communication.CLIENT_SEND_SHUTDOWN_COMPUTERS_FINISHED);
+                Connection.Client.Send(message.ToArray(), Connection.Client.RemoteHost, encryption);
             });
         }
 
@@ -337,13 +348,27 @@ namespace HVH.Client
         {
             return Task.Run(() =>
             {
-                Connection.Client.Send(unlock ? Communication.CLIENT_SEND_UNLOCK_COMPUTERS : Communication.CLIENT_SEND_LOCK_COMPUTERS, Connection.Client.RemoteHost, encryption);
+                List<String> message = new List<String> { unlock ? Communication.CLIENT_SEND_UNLOCK_COMPUTERS : Communication.CLIENT_SEND_LOCK_COMPUTERS };
                 foreach (String client in clients)
                 {
-                    Connection.Client.Send(client, Connection.Client.RemoteHost, encryption);
+                    message.Add(client);
                 }
-                Connection.Client.Send(unlock ? Communication.CLIENT_SEND_UNLOCK_COMPUTERS_FINISHED : Communication.CLIENT_SEND_LOCK_COMPUTERS_FINISHED, Connection.Client.RemoteHost, encryption);
+                message.Add(unlock ? Communication.CLIENT_SEND_UNLOCK_COMPUTERS_FINISHED : Communication.CLIENT_SEND_LOCK_COMPUTERS_FINISHED);
+                Connection.Client.Send(message.ToArray(), Connection.Client.RemoteHost, encryption);
             });
+        }
+
+        /// <summary>
+        /// Sends a logout / disconnection request to the server
+        /// </summary>
+        public void SendLogout()
+        {
+            Connection.Client.Send(new [] {
+                Communication.CLIENT_SEND_LOGOUT_REQUEST,
+                Communication.CLIENT_SEND_DISCONNECT
+            }, Connection.Client.RemoteHost, encryption);
+            Connection.Client.Close();
+            Environment.Exit(0);
         }
 
         /// <summary>
@@ -448,7 +473,7 @@ namespace HVH.Client
         private void ConnectionTerminated(HeliosConnectionException heliosConnectionException, IConnection connection)
         {
             // Server has gone offline, go and die too
-            log.FatalFormat("Server went offline. Reason: {0}", heliosConnectionException.Message);
+            log.FatalFormat("Server went offline. Reason: {0}", heliosConnectionException.Type);
             Connection.Client.Close();
             Environment.Exit(1);
         }

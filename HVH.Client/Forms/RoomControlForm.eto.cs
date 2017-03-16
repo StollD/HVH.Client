@@ -18,7 +18,7 @@ namespace HVH.Client.Forms
     /// <summary>
     /// Renders the window with the control options for teachers (control computers in the local room)
     /// </summary>
-    public partial class TeacherForm : Form
+    public partial class RoomControlForm : Form
     {        
         // Associations to all controls
         private static Dictionary<String, Control> controls = new Dictionary<String, Control>();

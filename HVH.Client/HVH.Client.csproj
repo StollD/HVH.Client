@@ -55,9 +55,9 @@
     <Compile Include="Forms\MenuForm.eto.cs">
       <DependentUpon>MenuForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\TeacherForm.cs" />
-    <Compile Include="Forms\TeacherForm.eto.cs">
-      <DependentUpon>TeacherForm.cs</DependentUpon>
+    <Compile Include="Forms\RoomControlForm.cs" />
+    <Compile Include="Forms\RoomControlForm.eto.cs">
+      <DependentUpon>RoomControlForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserType.cs" />

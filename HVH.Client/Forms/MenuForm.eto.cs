@@ -37,6 +37,17 @@ namespace HVH.Client.Forms
             };
             controls["logout"] = new Button { Text = "Logout", Size = new Size(240, 30) };
 
+            // Events
+            (controls["logout"] as Button).Click += delegate
+            {
+                Client.Instance.SendLogout();
+            };
+            (controls["roomControl"] as Button).Click += delegate
+            {
+                Application.Instance.MainForm = new RoomControlForm();
+                Application.Instance.MainForm.Show();
+                Visible = false;
+            };
             PixelLayout layout = new PixelLayout();
             layout.Add(controls["logo"], 40, 10);
             layout.Add(controls["roomControl"], 20, 250);

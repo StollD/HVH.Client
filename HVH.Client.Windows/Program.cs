@@ -16,7 +16,7 @@ namespace HVH.Client.Windows
         [STAThread]
         public static void Main(string[] args)
         {
-            new Application(Platform.Detect).Run(new LoadingForm());
+            new Application(Platforms.Wpf).Run(new LoadingForm());
         }
     }
 }

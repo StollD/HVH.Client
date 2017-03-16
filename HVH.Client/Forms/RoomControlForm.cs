@@ -19,14 +19,14 @@ namespace HVH.Client.Forms
     /// <summary>
     /// Renders the window with the control options for teachers (control computers in the local room)
     /// </summary>
-    public partial class TeacherForm
+    public partial class RoomControlForm
     {
         /// <summary>
         /// Logger
         /// </summary>
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        public TeacherForm()
+        public RoomControlForm()
         {
             log.Info("Opening Teacher Room Control Window");
             InitializeComponent();
